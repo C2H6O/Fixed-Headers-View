@@ -9,7 +9,6 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import net.doubov.fixedheadersview.adapters.BaseContentAdapter;
-import net.doubov.fixedheadersview.adapters.ContentAdapter;
 import net.doubov.fixedheadersview.adapters.FixedHeadersAdapter;
 
 public class FixedHeadersViewManager<TopType, SideType, ContentType> {

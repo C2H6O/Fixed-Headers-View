@@ -2,7 +2,6 @@ package net.doubov.fixedheadersview;
 
 import android.content.Context;
 import android.graphics.PointF;
-import android.hardware.SensorManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.LinearSmoothScroller;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import java.util.HashSet;
@@ -492,10 +490,11 @@ public class FixedGridLayoutManager
         fillGrid(direction, 0, 0, recycler, state, null);
     }
 
-    private void fillGrid(int direction, int emptyLeft, int emptyTop,
-                          RecyclerView.Recycler recycler,
-                          RecyclerView.State state,
-                          SparseIntArray removedPositions) {
+    private void fillGrid(
+            int direction, int emptyLeft, int emptyTop,
+            RecyclerView.Recycler recycler,
+            RecyclerView.State state,
+            SparseIntArray removedPositions) {
         if (mFirstDataWindowPosition < 0) {
             mFirstDataWindowPosition = 0;
         }
@@ -589,7 +588,7 @@ public class FixedGridLayoutManager
                 for (int offset = 0; offset < removedPositions.size(); offset++) {
                     //Look for off-screen removals that are less-than this
                     if (removedPositions.valueAt(offset) == REMOVE_INVISIBLE
-                            && removedPositions.keyAt(offset) < nextPosition) {
+                        && removedPositions.keyAt(offset) < nextPosition) {
                         //Offset position to match
                         offsetPosition--;
                     }
@@ -718,9 +717,9 @@ public class FixedGridLayoutManager
             @Override
             public PointF computeScrollVectorForPosition(int targetPosition) {
                 final int rowOffset = getGlobalRowOfPosition(targetPosition)
-                        - getGlobalRowOfPosition(mFirstDataWindowPosition);
+                                      - getGlobalRowOfPosition(mFirstDataWindowPosition);
                 final int columnOffset = getGlobalColumnOfPosition(targetPosition)
-                        - getGlobalColumnOfPosition(mFirstDataWindowPosition);
+                                         - getGlobalColumnOfPosition(mFirstDataWindowPosition);
 
                 return new PointF(columnOffset * mDecoratedChildWidth, rowOffset * mDecoratedChildHeight);
             }
@@ -868,7 +867,7 @@ public class FixedGridLayoutManager
                     //We are truly at the bottom, determine how far
 
                     bottomOffset = getVerticalSpace() - getDecoratedBottom(bottomView)
-                            + getPaddingBottom();
+                                   + getPaddingBottom();
                     if (DEBUG) {
                         Log.d(TAG, "first case: " + bottomOffset);
                     }
@@ -879,7 +878,7 @@ public class FixedGridLayoutManager
                      * ensure that at least one element in that row isn't fully recycled.
                      */
                     bottomOffset = getVerticalSpace() - (getDecoratedBottom(bottomView)
-                            + mDecoratedChildHeight) + getPaddingBottom();
+                                                         + mDecoratedChildHeight) + getPaddingBottom();
                     if (DEBUG) {
                         Log.d(TAG, "else case: " + bottomOffset);
                     }
@@ -1029,11 +1028,12 @@ public class FixedGridLayoutManager
      */
 
     /* Helper to obtain and place extra appearing views */
-    private void layoutAppearingViews(RecyclerView.Recycler recycler,
-                                      View referenceView,
-                                      int referencePosition,
-                                      int extraCount,
-                                      int offset) {
+    private void layoutAppearingViews(
+            RecyclerView.Recycler recycler,
+            View referenceView,
+            int referencePosition,
+            int extraCount,
+            int offset) {
         //Nothing to do...
         if (extraCount < 1) {
             return;

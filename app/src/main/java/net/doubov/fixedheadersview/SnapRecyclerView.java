@@ -126,25 +126,6 @@ public class SnapRecyclerView extends RecyclerView {
         // and there is no reason to overwrite that functionality--bad things will happen.
         final boolean ret = super.onTouchEvent(e);
 
-//        final LayoutManager lm = getLayoutManager();
-//
-//        if (lm instanceof ISnappyLayoutManager
-//                && (e.getAction() == MotionEvent.ACTION_UP ||
-//                e.getAction() == MotionEvent.ACTION_CANCEL)
-//                && getScrollState() == SCROLL_STATE_IDLE) {
-//            // The layout manager is a SnappyLayoutManager, which means that the
-//            // children should be snapped to a grid at the end of a drag or
-//            // fling. The motion event is either a user lifting their finger or
-//            // the cancellation of a motion events, so this is the time to take
-//            // over the scrolling to perform our own functionality.
-//            // Finally, the scroll state is idle--meaning that the resultant
-//            // velocity after the user's gesture was below the threshold, and
-//            // no fling was performed, so the view may be in an unaligned state
-//            // and will not be flung to a proper state.
-//            smoothScrollToPosition(((ISnappyLayoutManager) lm).getFixScrollPos());
-//        }
-
-        //
         switch (e.getAction()) {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
