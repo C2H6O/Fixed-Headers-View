@@ -2,12 +2,14 @@ package net.doubov.fixedheadersview;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import net.doubov.fixedheadersview.adapters.BaseContentAdapter;
+import net.doubov.fixedheadersview.adapters.ContentAdapter;
 import net.doubov.fixedheadersview.adapters.FixedHeadersAdapter;
 
 public class FixedHeadersViewManager<TopType, SideType, ContentType> {
@@ -26,6 +28,8 @@ public class FixedHeadersViewManager<TopType, SideType, ContentType> {
     private BaseContentAdapter<ContentType, ? extends RecyclerView.ViewHolder> contentAdapter;
     private FixedHeadersAdapter<TopType, ? extends RecyclerView.ViewHolder> topAdapter;
     private FixedHeadersAdapter<SideType, ? extends RecyclerView.ViewHolder> sideAdapter;
+
+    private Handler handler = new Handler();
 
     private FixedHeadersViewManager(Builder<TopType, SideType, ContentType> builder) {
         this.context = builder.context;
@@ -232,8 +236,11 @@ public class FixedHeadersViewManager<TopType, SideType, ContentType> {
         contentParams.addRule(RelativeLayout.BELOW, R.id.tableSpace);
         rv.setLayoutParams(contentParams);
 
-        FixedGridLayoutManager fixedGridLayoutManager = new FixedGridLayoutManager(context);
+        FixedGridLayoutManager fixedGridLayoutManager = new FixedGridLayoutManager();
         rv.setLayoutManager(fixedGridLayoutManager);
+        RecyclerView.RecycledViewPool viewPool = new RecyclerView.RecycledViewPool();
+        viewPool.setMaxRecycledViews(0, 300);
+        rv.setRecycledViewPool(viewPool);
         return rv;
     }
 
