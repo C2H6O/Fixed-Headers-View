@@ -7,8 +7,6 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import java.util.List;
-
 public class FixedHeadersViewManager<TopType, SideType, ContentType> {
 
     public static final String TAG = FixedHeadersViewManager.class.getSimpleName();
@@ -17,7 +15,7 @@ public class FixedHeadersViewManager<TopType, SideType, ContentType> {
     private Context context;
     private RelativeLayout container;
 
-    private FrameLayout mSpace;
+    private FrameLayout blankView;
     private RecyclerView topView;
     private RecyclerView sideView;
     private RecyclerView contentView;
@@ -26,37 +24,34 @@ public class FixedHeadersViewManager<TopType, SideType, ContentType> {
     private FixedHeadersAdapter<TopType, ? extends RecyclerView.ViewHolder> topAdapter;
     private FixedHeadersAdapter<SideType, ? extends RecyclerView.ViewHolder> sideAdapter;
 
-//    private TableCellClickedListener mListener;
-
     private FixedHeadersViewManager(Builder<TopType, SideType, ContentType> builder) {
         this.context = builder.context;
         this.container = builder.container;
         this.topAdapter = builder.topAdapter;
         this.sideAdapter = builder.sideAdapter;
         this.contentAdapter = builder.contentAdapter;
-    }
 
-    private void setup() {
-        mSpace = setupTableSpace();
+        blankView = setupTableSpace();
         topView = setupTopHeaderView();
         sideView = setupSideHeader();
         contentView = setupContentView();
         addViewsToContainer(container);
-//        setupAdapters();
 
+        topView.setAdapter(topAdapter);
+        sideView.setAdapter(sideAdapter);
+        contentView.setAdapter(contentAdapter);
+    }
+
+    private void setColumnCount(int columnCount) {
         FixedGridLayoutManager gridLayoutManager = (FixedGridLayoutManager) contentView.getLayoutManager();
-        gridLayoutManager.setTotalColumnCount(contentAdapter.getColCount());
+        gridLayoutManager.setTotalColumnCount(columnCount);
     }
 
     private void addViewsToContainer(RelativeLayout container) {
-        container.addView(mSpace);
+        container.addView(blankView);
         container.addView(topView);
         container.addView(sideView);
         container.addView(contentView);
-    }
-
-    public RelativeLayout getContainer() {
-        return container;
     }
 
     public void setContainer(RelativeLayout container) {
@@ -67,8 +62,176 @@ public class FixedHeadersViewManager<TopType, SideType, ContentType> {
         addViewsToContainer(container);
     }
 
-    public void setContentData(List<List<ContentType>> contentData) {
-        contentAdapter.setData(contentData);
+    public void setData(TopType[] topData, SideType[] sideData, ContentType[][] contentData) {
+        topAdapter.setData(topData, false);
+        sideAdapter.setData(sideData, false);
+        contentAdapter.setData(contentData, false);
+
+        // now that we have data, set the # of columns
+        setColumnCount(contentAdapter.getColCount());
+
+        setupSpaceLayoutParams();
+        setupContentViewLayoutParams();
+        setupSideHeaderLayoutParams();
+        setupTopHeaderLayoutParams();
+
+        topAdapter.notifyDataSetChanged();
+        sideAdapter.notifyDataSetChanged();
+        contentAdapter.notifyDataSetChanged();
+    }
+
+    RecyclerView.OnScrollListener mScrollListener =
+            new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    int id = recyclerView.getId();
+                    switch (id) {
+                        case R.id.tableTopHeader:
+                        case R.id.tableResultSetHeader:
+//                            Log.d(TAG, "scrollBy: " + dx + "/" + dy);
+                            // temporarily remove the scroll listener to prevent recursive calls to onScrolled
+                            contentView.removeOnScrollListener(this);
+                            contentView.scrollBy(dx, dy);
+                            contentView.addOnScrollListener(this);
+                            break;
+                        case R.id.tableContent:
+//                            Log.d(TAG, "scrollBy: " + dx + "/" + dy);
+                            // temporarily remove the scroll listener to prevent recursive calls to onScrolled
+                            sideView.removeOnScrollListener(this);
+                            topView.removeOnScrollListener(this);
+
+                            sideView.scrollBy(dx, dy);
+                            topView.scrollBy(dx, dy);
+
+                            sideView.addOnScrollListener(this);
+                            topView.addOnScrollListener(this);
+                            break;
+                    }
+                }
+            };
+
+    private void setupTopHeaderLayoutParams() {
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topView.getLayoutParams();
+
+        params.height = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_height);
+        params.width = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_width) * contentAdapter.getItemCount();
+
+    }
+
+    private RecyclerView setupTopHeaderView() {
+        // Dates Header RV
+        RecyclerView rv = new RecyclerView(context);
+        rv.setId(R.id.tableTopHeader);
+        rv.setTag(R.id.tableTopHeader);
+        RelativeLayout.LayoutParams params =
+                new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        params.addRule(RelativeLayout.RIGHT_OF, R.id.tableSpace);
+
+        rv.setLayoutParams(params);
+
+        LinearLayoutManager topManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+        rv.setLayoutManager(topManager);
+
+        rv.addOnScrollListener(mScrollListener);
+        return rv;
+    }
+
+    private FrameLayout setupTableSpace() {
+        // Empty space layout
+        FrameLayout space = new FrameLayout(context);
+        space.setId(R.id.tableSpace);
+        if (Build.VERSION.SDK_INT < 21) {
+            space.setBackground(context.getResources().getDrawable(R.drawable.new_table_header_background));
+        } else {
+            space.setBackground(context.getDrawable(R.drawable.new_table_header_background));
+        }
+
+        RelativeLayout.LayoutParams spaceParams =
+                new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                );
+        space.setLayoutParams(spaceParams);
+        return space;
+    }
+
+    private void setupSpaceLayoutParams() {
+        RelativeLayout.LayoutParams spaceParams = (RelativeLayout.LayoutParams) blankView.getLayoutParams();
+
+        spaceParams.width = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_width);
+        spaceParams.height = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_height);
+    }
+
+    private void setupSideHeaderLayoutParams() {
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) sideView.getLayoutParams();
+
+        params.width = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_width);
+        params.height = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_height) * contentAdapter.getRowCount();
+    }
+
+    private RecyclerView setupSideHeader() {
+        // ResultSet Header RV
+        RecyclerView rv = new RecyclerView(context);
+        rv.addOnScrollListener(mScrollListener);
+
+        rv.setId(R.id.tableResultSetHeader);
+        rv.setTag(R.id.tableResultSetHeader);
+
+        RelativeLayout.LayoutParams params =
+                new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                );
+        params.addRule(RelativeLayout.BELOW, R.id.tableSpace);
+
+        rv.setLayoutParams(params);
+
+        RecyclerView.LayoutManager rsManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        rv.setLayoutManager(rsManager);
+        return rv;
+    }
+
+    private void setupContentViewLayoutParams() {
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) contentView.getLayoutParams();
+
+        params.height = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_height) * contentAdapter.getRowCount();
+
+        params.width = (int) context.getResources()
+                .getDimension(R.dimen.table_cell_width) * contentAdapter.getColCount();
+    }
+
+    private RecyclerView setupContentView() {
+        // content RV
+        RecyclerView rv = new SnapRecyclerView(context);
+        rv.addOnScrollListener(mScrollListener);
+
+        rv.setId(R.id.tableContent);
+        rv.setTag(R.id.tableContent);
+
+        RelativeLayout.LayoutParams contentParams =
+                new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        contentParams.addRule(RelativeLayout.RIGHT_OF, R.id.tableSpace);
+        contentParams.addRule(RelativeLayout.BELOW, R.id.tableSpace);
+        rv.setLayoutParams(contentParams);
+
+        FixedGridLayoutManager fixedGridLayoutManager = new FixedGridLayoutManager(context);
+        rv.setLayoutManager(fixedGridLayoutManager);
+        return rv;
     }
 
     public static class Builder<T, S, C> {
@@ -113,224 +276,8 @@ public class FixedHeadersViewManager<TopType, SideType, ContentType> {
                 throw new IllegalStateException("Make sure to set all the builder parameters");
             }
 
-            FixedHeadersViewManager<T, S, C> manager = new FixedHeadersViewManager<>(this);
-            manager.setup();
-
-            return manager;
+            return new FixedHeadersViewManager<>(this);
         }
-
-    }
-
-
-//    public boolean hasData() {
-//        return sideData != null && sideData.size() > 0;
-//    }
-//
-//    public void setData(List<S> resultSets) {
-////        if (DEBUG) {
-////            Log.d(TAG, "setData: " + resultSets);
-////        }
-//        sideData.clear();
-//        topData.clear();
-//        contentData.clear();
-//
-//        if (resultSets.size() > 0) {
-//            sideData.addAll(resultSets);
-//            topData.addAll(generateDatesHeaderList(sideData));
-//
-//            Result[][] resultsMatrix = generateContentData(sideData, topData, isTransposed);
-//
-//            for (Result[] row : resultsMatrix) {
-//                contentData.add(Arrays.asList(row));
-//            }
-//        }
-//
-//        // Adjust the LayoutParameters of Views to the size of the new data;
-//        setupSideHeaderLayoutParams(isTransposed);
-//        setupTopHeaderLayoutParams(isTransposed);
-//        setupContentViewLayoutParams();
-//        setupSpaceLayoutParams();
-//
-//        topView.getAdapter().notifyDataSetChanged();
-//        sideView.getAdapter().notifyDataSetChanged();
-//
-//        BaseContentAdapter contentAdapter = (BaseContentAdapter) contentView.getAdapter();
-//        contentAdapter.onDataChanged();
-//    }
-
-    RecyclerView.OnScrollListener mScrollListener =
-            new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    int id = recyclerView.getId();
-                    switch (id) {
-                        case R.id.tableTopHeader:
-                        case R.id.tableResultSetHeader:
-//                            Log.d(TAG, "scrollBy: " + dx + "/" + dy);
-                            // temporarily remove the scroll listener to prevent recursive calls to onScrolled
-                            contentView.removeOnScrollListener(this);
-                            contentView.scrollBy(dx, dy);
-                            contentView.addOnScrollListener(this);
-                            break;
-                        case R.id.tableContent:
-//                            Log.d(TAG, "scrollBy: " + dx + "/" + dy);
-                            // temporarily remove the scroll listener to prevent recursive calls to onScrolled
-                            sideView.removeOnScrollListener(this);
-                            topView.removeOnScrollListener(this);
-
-                            sideView.scrollBy(dx, dy);
-                            topView.scrollBy(dx, dy);
-
-                            sideView.addOnScrollListener(this);
-                            topView.addOnScrollListener(this);
-                            break;
-                    }
-                }
-            };
-//
-//    public void setupAdapters() {
-//        if (DEBUG) {
-//            Log.d(TAG, "setupAdapters");
-//        }
-//        DatesHeaderAdapter datesAdapter = new DatesHeaderAdapter(vhDateUtil, dateTypeFormat);
-//        datesAdapter.setData(topData);
-//        topView.setAdapter(datesAdapter);
-//
-//
-//        ResultSetsHeaderAdapter rsAdapter = new ResultSetsHeaderAdapter();
-//        rsAdapter.setData(sideData);
-//        sideView.setAdapter(rsAdapter);
-//
-//        BaseContentAdapter contentAdapter = new BaseContentAdapter(context);
-//        contentAdapter.setData(contentData);
-//        contentAdapter.setListener(this);
-//        contentView.setAdapter(contentAdapter);
-//    }
-
-    private void setupTopHeaderLayoutParams(boolean isTransposed) {
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) topView.getLayoutParams();
-
-        params.height = (int) context.getResources().getDimension(R.dimen.side_header_height);
-        params.width = (int) context.getResources()
-                        .getDimension(R.dimen.side_header_width) * contentAdapter.getItemCount();
-
-    }
-
-    private RecyclerView setupTopHeaderView() {
-        // Dates Header RV
-        RecyclerView rv = new RecyclerView(context);
-        rv.setId(R.id.tableTopHeader);
-        rv.setTag(R.id.tableTopHeader);
-        RelativeLayout.LayoutParams params =
-                new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        params.addRule(RelativeLayout.RIGHT_OF, R.id.tableSpace);
-
-        rv.setLayoutParams(params);
-
-        LinearLayoutManager datesLM = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-        rv.setLayoutManager(datesLM);
-
-        rv.addOnScrollListener(mScrollListener);
-        return rv;
-    }
-
-    private FrameLayout setupTableSpace() {
-        // Empty space layout
-        FrameLayout space = new FrameLayout(context);
-        space.setId(R.id.tableSpace);
-        if (Build.VERSION.SDK_INT < 21) {
-            space.setBackground(context.getResources().getDrawable(R.drawable.new_table_header_background));
-        } else {
-            space.setBackground(context.getDrawable(R.drawable.new_table_header_background));
-        }
-
-        RelativeLayout.LayoutParams spaceParams =
-                new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT
-                );
-        space.setLayoutParams(spaceParams);
-        return space;
-    }
-
-    private void setupSpaceLayoutParams() {
-        RelativeLayout.LayoutParams spaceParams = (RelativeLayout.LayoutParams) mSpace.getLayoutParams();
-
-        spaceParams.width = (int) context.getResources().getDimension(R.dimen.side_header_width);
-        spaceParams.height = (int) context.getResources().getDimension(R.dimen.side_header_height);
-    }
-
-    private void setupSideHeaderLayoutParams() {
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) sideView.getLayoutParams();
-
-        params.width = (int) context.getResources().getDimension(R.dimen.side_header_width);
-        params.height = (int) context.getResources()
-                        .getDimension(R.dimen.side_header_height) * contentAdapter.getRowCount();
-    }
-
-    private RecyclerView setupSideHeader() {
-
-
-        // ResultSet Header RV
-        RecyclerView rv = new RecyclerView(context);
-        rv.addOnScrollListener(mScrollListener);
-
-        rv.setId(R.id.tableResultSetHeader);
-        rv.setTag(R.id.tableResultSetHeader);
-
-        RelativeLayout.LayoutParams params =
-                new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT
-                );
-        params.addRule(RelativeLayout.BELOW, R.id.tableSpace);
-
-        rv.setLayoutParams(params);
-
-        RecyclerView.LayoutManager rsManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-        rv.setLayoutManager(rsManager);
-        return rv;
-    }
-
-    private void setupContentViewLayoutParams() {
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) contentView.getLayoutParams();
-
-        params.height = (int) context.getResources()
-                        .getDimension(R.dimen.side_header_height) * contentAdapter.getRowCount();
-
-        params.width = (int) context.getResources()
-                        .getDimension(R.dimen.side_header_width) * contentAdapter.getColCount();
-
-
-    }
-
-    private RecyclerView setupContentView() {
-        // content RV
-        RecyclerView rv = new SnapRecyclerView(context);
-        rv.addOnScrollListener(mScrollListener);
-
-        rv.setId(R.id.tableContent);
-        rv.setTag(R.id.tableContent);
-
-        RelativeLayout.LayoutParams contentParams =
-                new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        contentParams.addRule(RelativeLayout.RIGHT_OF, R.id.tableSpace);
-        contentParams.addRule(RelativeLayout.BELOW, R.id.tableSpace);
-
-        rv.setLayoutParams(contentParams);
-
-        FixedGridLayoutManager fixedGridLayoutManager = new FixedGridLayoutManager(context);
-
-        rv.setLayoutManager(fixedGridLayoutManager);
-        return rv;
     }
 
 }

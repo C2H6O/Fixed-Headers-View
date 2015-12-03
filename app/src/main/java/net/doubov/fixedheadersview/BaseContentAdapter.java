@@ -13,12 +13,15 @@ public abstract class BaseContentAdapter<Content, ContentHolder extends Recycler
 
     protected List<List<Content>> contentData = new ArrayList<>();
 
-    public void setData(Content[][] content) {
+    public void setData(Content[][] content, boolean notifyDataSetChanged) {
         contentData.clear();
         for (Content[] row : content) {
             contentData.add(Arrays.asList(row));
         }
-        notifyDataSetChanged();
+
+        if (notifyDataSetChanged) {
+            notifyDataSetChanged();
+        }
     }
 
     public void setData(List<List<Content>> content) {

@@ -3,10 +3,7 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
 
-    <!-- Table Dimensions -->
-    <dimen name="side_header_width">110dp</dimen>
-    <dimen name="side_header_height">50dp</dimen>
-    <dimen name="content_width">110dp</dimen>
-    <dimen name="content_height">50dp</dimen>
+    <dimen name="table_cell_height">50dp</dimen>
+    <dimen name="table_cell_width">110dp</dimen>
 
 </resources>

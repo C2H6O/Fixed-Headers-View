@@ -13,7 +13,7 @@ public class SideAdapter extends FixedHeadersAdapter<String, SideAdapter.Holder>
 
     @Override
     public SideAdapter.Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
         return new Holder(v);
     }
 
@@ -31,8 +31,8 @@ public class SideAdapter extends FixedHeadersAdapter<String, SideAdapter.Holder>
         public Holder(View itemView) {
             super(itemView);
 
-            text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text2 = (TextView) itemView.findViewById(android.R.id.text2);
+            text1 = (TextView) itemView.findViewById(R.id.text1);
+            text2 = (TextView) itemView.findViewById(R.id.text2);
         }
     }
 

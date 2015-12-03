@@ -10,44 +10,37 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ScrollingActivity extends AppCompatActivity {
 
-    FixedGridLayoutManager lm;
     FixedHeadersViewManager<String, String, String> vm;
+
+    String[][] contentData = new String[][] {
+            {"row1 item1", "row1 item2", "row1 item3", "row1 item4", "row1 item5", "row1 item6", "row1 item7", "row1 item8", "row1 item9", "row1 item10"},
+            {"row2 item1", "row2 item2", "row2 item3", "row2 item4", "row2 item5", "row2 item6", "row2 item7", "row2 item8", "row2 item9", "row2 item10"}
+    };
+
+    String[] topData = new String[] {"top1", "top2", "top3", "top4", "top5", "top6", "top7", "top8", "top9", "top10"};
+    String[] sideData = new String[] {"side1", "side2"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scrolling);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         RelativeLayout container = (RelativeLayout) findViewById(R.id.container);
-
-        lm = new FixedGridLayoutManager(this);
-
-        ContentAdapter contentAdapter = new ContentAdapter();
-        TopAdapter topAdapter = new TopAdapter();
-        SideAdapter sideAdapter = new SideAdapter();
 
         vm = new FixedHeadersViewManager.Builder<String, String, String>()
                 .container(container)
                 .context(this)
                 .contentAdapter(new ContentAdapter())
-                .topAdapter(topAdapter)
+                .topAdapter(new TopAdapter())
                 .sideAdapter(new SideAdapter())
                 .build();
-        ;
 
+        vm.setData(topData, sideData, contentData);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class ContentAdapter extends BaseContentAdapter<String, ContentAdapter.Co
 
     @Override
     public ContentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
         return new ContentHolder(v);
     }
 
@@ -29,8 +29,8 @@ public class ContentAdapter extends BaseContentAdapter<String, ContentAdapter.Co
         public ContentHolder(View itemView) {
             super(itemView);
 
-            text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text2 = (TextView) itemView.findViewById(android.R.id.text2);
+            text1 = (TextView) itemView.findViewById(R.id.text1);
+            text2 = (TextView) itemView.findViewById(R.id.text2);
         }
     }
 
