@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="tableSpace"/>
+    <item type="id" name="tableTopHeader"/>
+    <item type="id" name="tableResultSetHeader"/>
+    <item type="id" name="tableContent"/>
+</resources>
