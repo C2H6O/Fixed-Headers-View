@@ -34,11 +34,11 @@ public abstract class BaseContentAdapter<Content, ContentHolder extends Recycler
         return !contentData.isEmpty();
     }
 
-    protected int getRowCount() {
+    public int getRowCount() {
         return contentData.size();
     }
 
-    protected int getColCount() {
+    public int getColCount() {
         return hasData() ? contentData.get(0).size() : 0;
     }
 
