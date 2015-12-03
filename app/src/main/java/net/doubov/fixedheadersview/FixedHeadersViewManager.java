@@ -7,6 +7,9 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import net.doubov.fixedheadersview.adapters.BaseContentAdapter;
+import net.doubov.fixedheadersview.adapters.FixedHeadersAdapter;
+
 public class FixedHeadersViewManager<TopType, SideType, ContentType> {
 
     public static final String TAG = FixedHeadersViewManager.class.getSimpleName();

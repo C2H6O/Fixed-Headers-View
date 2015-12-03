@@ -1,4 +1,4 @@
-package net.doubov.fixedheadersview;
+package net.doubov.fixedheadersview.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,27 +6,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import net.doubov.fixedheadersview.R;
 
-public class SideAdapter extends FixedHeadersAdapter<String, SideAdapter.Holder> {
+public class TopAdapter extends FixedHeadersAdapter<String, TopAdapter.Holder> {
 
     @Override
-    public SideAdapter.Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TopAdapter.Holder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
         return new Holder(v);
     }
 
     @Override
-    public void onBindViewHolder(SideAdapter.Holder holder, int position) {
+    public void onBindViewHolder(TopAdapter.Holder holder, int position) {
         holder.text1.setText(data.get(position));
         holder.text2.setText(String.format("P: %d", position));
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
 
-        private TextView text1;
-        private TextView text2;
+        public TextView text1;
+        public TextView text2;
 
         public Holder(View itemView) {
             super(itemView);

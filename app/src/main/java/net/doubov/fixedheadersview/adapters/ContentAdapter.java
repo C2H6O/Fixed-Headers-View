@@ -1,10 +1,12 @@
-package net.doubov.fixedheadersview;
+package net.doubov.fixedheadersview.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import net.doubov.fixedheadersview.R;
 
 public class ContentAdapter extends BaseContentAdapter<String, ContentAdapter.ContentHolder> {
 

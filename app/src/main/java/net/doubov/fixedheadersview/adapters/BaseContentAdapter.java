@@ -1,4 +1,4 @@
-package net.doubov.fixedheadersview;
+package net.doubov.fixedheadersview.adapters;
 
 import android.support.v7.widget.RecyclerView;
 

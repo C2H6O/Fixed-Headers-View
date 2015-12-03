@@ -13,8 +13,6 @@ public class SnapRecyclerView extends RecyclerView {
     private float mDownX;
     private float mDownY;
 
-    public static final int VELOCITY_SNAP_THRESHOLD = 9000;
-
     public static final String TAG = SnapRecyclerView.class.getSimpleName();
 
     public SnapRecyclerView(Context context) {
@@ -27,24 +25,6 @@ public class SnapRecyclerView extends RecyclerView {
 
     public SnapRecyclerView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-    @Override
-    public boolean fling(int velocityX, int velocityY) {
-//        final LayoutManager lm = getLayoutManager();
-//        /*
-//        If the LayoutManager has a snap behaviour, calculate the final position based on the
-//        X/Y velocities and scroll to that position
-//         */
-//        if (lm instanceof ISnappyLayoutManager) {
-//
-//            if (velocityX != 0 && Math.abs(velocityX) < VELOCITY_SNAP_THRESHOLD) {
-//                int position = ((ISnappyLayoutManager) lm).getPositionForVelocity(velocityX);
-//                super.smoothScrollToPosition(position);
-//                return true;
-//            }
-//        }
-        return super.fling(velocityX, velocityY);
     }
 
     @Override

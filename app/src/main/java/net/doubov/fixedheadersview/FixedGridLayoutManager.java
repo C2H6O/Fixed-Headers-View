@@ -35,8 +35,7 @@ import java.util.List;
  * </ul>
  */
 public class FixedGridLayoutManager
-        extends RecyclerView.LayoutManager
-        implements ISnappyLayoutManager {
+        extends RecyclerView.LayoutManager {
 
     public FixedGridLayoutManager(Context context) {
         calculateDeceleration(context);
@@ -1203,65 +1202,6 @@ public class FixedGridLayoutManager
 
     private int getVerticalSpace() {
         return getHeight() - getPaddingBottom() - getPaddingTop();
-    }
-
-    @Override
-    public int getFixScrollPos() {
-        // if empty or can't scroll in either direction
-        if (getChildCount() == 0 || (!canScrollHorizontally() && !canScrollVertically())) {
-            return 0;
-        }
-
-        final View child = getChildAt(0);
-        int childPos = getPosition(child);
-
-        if (Math.abs(child.getLeft()) > child.getMeasuredWidth() / 2) {
-            childPos += 1;
-        }
-
-        if (Math.abs(child.getTop()) > child.getMeasuredHeight() / 2) {
-            childPos += getTotalColumnCount();
-        }
-
-        return childPos;
-    }
-
-    @Override
-    public int getPositionForVelocity(int velocity) {
-        // if empty or can't scroll in either direction
-        if (getChildCount() == 0 || (!canScrollHorizontally() && !canScrollVertically())) {
-            return 0;
-        }
-        // get the first visible child on the screen
-        View v = getChildAt(0);
-
-        // in a case where we've hit the right edge, left most child is not visible and we should get
-        // the next child
-        if (getChildCount() > 0 && v.getRight() < 0) {
-            v = getChildAt(1);
-        }
-
-        int viewAdapterPosition = getPosition(v);
-        // if velocity is negative, the first visible view is barely on the screen, so we increase the
-        // position to reflect the position of the first fully visible view
-        if (velocity < 0) {
-            viewAdapterPosition++;
-        }
-
-        final double vel = Math.sqrt(velocity * velocity);
-        final double dist = getSplineFlingDistance(vel);
-        final double tempScroll = velocity > 0 ? v.getLeft() + dist : v.getRight() - dist;
-        final long scrollWidth = Math.round(tempScroll / v.getWidth());
-
-        if (scrollWidth > 0) {
-            viewAdapterPosition++;
-        } else if (scrollWidth < 0 && viewAdapterPosition > 0) {
-            viewAdapterPosition--;
-        }
-
-        Log.d(TAG, "viewAdapterPosition: " + viewAdapterPosition);
-
-        return viewAdapterPosition;
     }
 
     private double getSplineFlingDistance(double velocity) {
